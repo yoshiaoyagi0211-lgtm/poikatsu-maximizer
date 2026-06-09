@@ -32,14 +32,16 @@ const routeData = [
             { name: 'ANA Pay', note: 'チャージ', rate: 0.5 },
             { name: 'TOYOTA Wallet', note: 'チャージ', rate: 1.0 },
             { name: 'モバイルSuica', note: '決済', rate: 0 }
-        ]
+        ],
+        recommend: 'smbc_gold' // 自分が持っているから特にレコメンドしなくていい場合はnullにできるが、ここでは表示する例
     },
     {
         cardId: 'epos_gold', walletId: 'mobile_suica', rate: 2.5,
         path: [
             { name: 'エポスゴールド', note: '選べるPアップ+修行', rate: 1.5 },
             { name: 'モバイルSuica', note: '直接チャージ等', rate: 1.0 }
-        ]
+        ],
+        recommend: 'epos_gold'
     },
     {
         cardId: 'epos_gold', walletId: 'rakuten_pay', rate: 2.5,
@@ -49,7 +51,8 @@ const routeData = [
             { name: 'WAON', note: 'Apple Pay経由', rate: 1.0 },
             { name: '楽天POSA購入', note: 'ミニストップ等', rate: 0 },
             { name: '楽天ペイ', note: '決済', rate: 0 } 
-        ]
+        ],
+        recommend: 'rakuten_premium'
     },
     {
         cardId: 'rakuten', walletId: 'rakuten_pay', rate: 1.5,
@@ -57,48 +60,99 @@ const routeData = [
             { name: '楽天カード', note: 'チャージ', rate: 0.5 },
             { name: '楽天キャッシュ', note: '経由', rate: 0 },
             { name: '楽天ペイ', note: '決済', rate: 1.0 }
-        ]
+        ],
+        recommend: 'rakuten_premium'
     },
     {
         cardId: 'paypay_card', walletId: 'paypay', rate: 1.5,
         path: [
             { name: 'PayPayカード', note: 'クレジット', rate: 1.0 },
             { name: 'PayPay', note: '決済(ステップ等)', rate: 0.5 }
-        ]
+        ],
+        recommend: 'paypay_gold'
     },
     {
         cardId: 'dcard_gold', walletId: 'd_barai', rate: 1.0,
         path: [
             { name: 'dカード GOLD', note: '紐付け', rate: 0.5 },
             { name: 'd払い', note: '決済', rate: 0.5 }
-        ]
+        ],
+        recommend: 'dcard_gold'
     },
     {
         cardId: 'aeon_card', walletId: 'waon', rate: 1.0,
         path: [
             { name: 'イオンカード', note: 'チャージ', rate: 0.5 },
             { name: 'WAON', note: '決済', rate: 0.5 }
-        ]
+        ],
+        recommend: 'aeon_gold'
     },
     {
         cardId: 'recruit', walletId: 'd_barai', rate: 1.7,
         path: [
             { name: 'リクルートカード', note: '紐付け', rate: 1.2 },
             { name: 'd払い', note: '決済', rate: 0.5 }
-        ]
+        ],
+        recommend: 'dcard_gold'
     },
     {
         cardId: 'amazon_master', walletId: 'paypay', rate: 1.0,
         path: [
             { name: 'Amazon(M)', note: '紐付け', rate: 1.0 },
             { name: 'PayPay', note: '決済', rate: 0 }
-        ]
+        ],
+        recommend: 'amazon_prime'
     }
 ];
+
+// レコメンドカード（広告）のマスタデータ
+const recommendCards = {
+    'smbc_gold': {
+        name: '三井住友カード ゴールド（NL）',
+        note: '年間100万円利用で年会費永年無料＆1万pt還元。コンビニ・飲食店で最大7%還元！',
+        url: '#'
+    },
+    'epos_gold': {
+        name: 'エポスゴールドカード',
+        note: '選べるポイントアップショップでポイント3倍！モバイルSuicaも対象にできます。',
+        url: '#'
+    },
+    'rakuten_premium': {
+        name: '楽天プレミアムカード',
+        note: '楽天経済圏の最強カード！楽天市場でポイント最大+4倍、空港ラウンジも無料で使えます。',
+        url: '#'
+    },
+    'paypay_gold': {
+        name: 'PayPayカード ゴールド',
+        note: 'ソフトバンク・ワイモバイルユーザーなら通信料で最大10%還元！PayPay決済も常時お得に。',
+        url: '#'
+    },
+    'dcard_gold': {
+        name: 'dカード GOLD',
+        note: 'ドコモのケータイ・ドコモ光の利用料金の10%が還元！d払いとの相性も抜群です。',
+        url: '#'
+    },
+    'aeon_gold': {
+        name: 'イオンゴールドカード',
+        note: 'インビテーション限定！年会費無料でイオンラウンジが利用可能に。',
+        url: '#'
+    },
+    'amazon_prime': {
+        name: 'Amazon Prime Mastercard',
+        note: 'プライム会員ならAmazonでの買い物が常に2%還元！主要コンビニでも1.5%還元。',
+        url: '#'
+    },
+    'default': {
+        name: '三井住友カード ゴールド（NL）',
+        note: '迷ったらこれ！年間100万円利用で年会費永年無料＆1万pt還元。',
+        url: '#'
+    }
+};
 
 // 選択状態
 let selectedCards = new Set();
 let selectedWallets = new Set();
+let selectedFurusato = null;
 
 function init() {
     renderCheckboxes('credit-cards', creditCards, selectedCards);
@@ -116,13 +170,13 @@ function renderCheckboxes(containerId, items, selectedSet) {
         const iconClass = containerId === 'credit-cards' ? 'fa-credit-card' : 'fa-mobile-alt';
         
         return `
-        <label class="relative flex flex-col items-center justify-center p-3 border rounded-xl cursor-pointer transition-colors duration-200 ${isSelected ? 'border-blue-700 bg-blue-50 shadow-sm' : 'border-slate-200 bg-white hover:border-blue-300 hover:bg-slate-50'}">
+        <label class="relative flex flex-col items-center justify-center p-3 border rounded-xl cursor-pointer transition-all duration-200 ${isSelected ? 'border-amber-500 bg-slate-900 shadow-md transform -translate-y-0.5' : 'border-slate-200 bg-white hover:border-slate-400 hover:bg-slate-50 shadow-sm'}">
             <input type="checkbox" value="${item.id}" class="absolute opacity-0 w-0 h-0" ${isSelected ? 'checked' : ''}>
-            <div class="absolute top-2 right-2 ${isSelected ? 'text-blue-700' : 'text-transparent'}">
+            <div class="absolute top-2 right-2 ${isSelected ? 'text-amber-500' : 'text-transparent'}">
                 <i class="fas fa-check-circle text-lg"></i>
             </div>
-            <i class="fas ${iconClass} text-2xl mb-2 ${item.color || 'text-slate-400'}"></i>
-            <span class="text-sm font-bold text-slate-700 text-center leading-tight">${item.name}</span>
+            <i class="fas ${iconClass} text-2xl mb-2 ${isSelected ? 'text-amber-500' : (item.color || 'text-slate-400')}"></i>
+            <span class="text-sm font-bold ${isSelected ? 'text-white' : 'text-slate-700'} text-center leading-tight">${item.name}</span>
         </label>
         `;
     }).join('');
@@ -148,6 +202,7 @@ function calculateBestRoute() {
 
     let bestRate = -1;
     let bestRoutePath = null;
+    let bestRecommendId = 'default';
 
     selectedCards.forEach(cardId => {
         selectedWallets.forEach(walletId => {
@@ -158,6 +213,7 @@ function calculateBestRoute() {
                 if (route.rate > bestRate) {
                     bestRate = route.rate;
                     bestRoutePath = route.path;
+                    bestRecommendId = route.recommend || 'default';
                 }
             } else {
                 // 定義がない場合の汎用ルート（還元率0.5%として扱う）
@@ -170,43 +226,56 @@ function calculateBestRoute() {
                         { name: card.name, note: '直接チャージ等', rate: 0.5 },
                         { name: wallet.name, note: '決済', rate: 0 }
                     ];
+                    // 汎用ルートの場合はそのカードに応じたデフォルトレコメンドにするなど工夫可能だが、ここではdefaultとする
+                    bestRecommendId = 'default';
                 }
             }
         });
     });
 
-    displayResult(bestRoutePath, bestRate);
+    displayResult(bestRoutePath, bestRate, bestRecommendId);
 }
 
-function displayResult(path, rate) {
+function displayResult(path, rate, recommendId) {
     const resultArea = document.getElementById('result-area');
     const routeContainer = document.getElementById('route-container');
     const resultRate = document.getElementById('result-rate');
+    
+    // おすすめカード要素
+    const recName = document.getElementById('recommend-card-name');
+    const recNote = document.getElementById('recommend-card-note');
+    const recLink = document.getElementById('recommend-card-link');
 
     routeContainer.innerHTML = '';
 
     path.forEach((step, index) => {
         // ステップの描画
         const stepDiv = document.createElement('div');
-        stepDiv.className = 'bg-white p-3 md:p-4 rounded-lg shadow-sm text-center border-t-4 border-blue-700 flex-1 min-w-[120px] max-w-[180px] w-full relative z-10';
+        stepDiv.className = 'bg-slate-800 p-3 md:p-4 rounded-lg shadow-md text-center border-t-4 border-amber-500 flex-1 min-w-[120px] max-w-[180px] w-full relative z-10';
         
         stepDiv.innerHTML = `
-            <p class="text-xs text-slate-500 mb-1">${step.note}</p>
-            <p class="font-bold text-sm md:text-base text-slate-800 leading-tight">${step.name}</p>
-            <p class="text-xs text-blue-600 font-bold mt-1">+${step.rate.toFixed(1)}%</p>
+            <p class="text-xs text-slate-400 mb-1">${step.note}</p>
+            <p class="font-bold text-sm md:text-base text-white leading-tight">${step.name}</p>
+            <p class="text-xs text-amber-500 font-bold mt-1">+${step.rate.toFixed(1)}%</p>
         `;
         routeContainer.appendChild(stepDiv);
 
         // 矢印の描画 (最後以外)
         if (index < path.length - 1) {
             const arrowDiv = document.createElement('div');
-            arrowDiv.className = 'text-slate-300 mx-1 flex flex-col justify-center';
+            arrowDiv.className = 'text-slate-500 mx-1 flex flex-col justify-center';
             arrowDiv.innerHTML = '<i class="fas fa-arrow-down md:fa-arrow-right text-xl md:text-2xl"></i>';
             routeContainer.appendChild(arrowDiv);
         }
     });
 
     resultRate.textContent = rate.toFixed(1);
+
+    // レコメンドカードの反映
+    const recData = recommendCards[recommendId] || recommendCards['default'];
+    recName.textContent = recData.name;
+    recNote.textContent = recData.note;
+    recLink.href = recData.url;
 
     resultArea.classList.remove('hidden');
     // 再生のためのアニメーションリセット
@@ -248,24 +317,28 @@ const furusatoRules = {
 
 function renderFurusatoRadio() {
     const container = document.getElementById('furusato-ec');
-    container.innerHTML = furusatoEcSites.map(site => `
-        <label class="relative flex flex-col items-center justify-center p-3 border rounded-xl cursor-pointer transition-colors duration-200 bg-white border-slate-200 hover:border-blue-300 hover:bg-slate-50">
-            <input type="radio" name="furusato" value="${site.id}" class="absolute opacity-0 w-0 h-0">
-            <i class="fas ${site.icon} text-2xl mb-2 ${site.color}"></i>
-            <span class="text-sm font-bold text-slate-700 text-center leading-tight">${site.name}</span>
+    container.innerHTML = furusatoEcSites.map(site => {
+        const isSelected = selectedFurusato === site.id;
+        return `
+        <label class="relative flex flex-col items-center justify-center p-3 border rounded-xl cursor-pointer transition-all duration-200 ${isSelected ? 'border-amber-500 bg-slate-900 shadow-md transform -translate-y-0.5' : 'border-slate-200 bg-white hover:border-slate-400 hover:bg-slate-50 shadow-sm'}">
+            <input type="radio" name="furusato" value="${site.id}" class="absolute opacity-0 w-0 h-0" ${isSelected ? 'checked' : ''}>
+            <div class="absolute top-2 right-2 ${isSelected ? 'text-amber-500' : 'text-transparent'}">
+                <i class="fas fa-check-circle text-lg"></i>
+            </div>
+            <i class="fas ${site.icon} text-2xl mb-2 ${isSelected ? 'text-amber-500' : (site.color || 'text-slate-400')}"></i>
+            <span class="text-sm font-bold ${isSelected ? 'text-white' : 'text-slate-700'} text-center leading-tight">${site.name}</span>
         </label>
-    `).join('');
+        `;
+    }).join('');
 
     const inputs = container.querySelectorAll('input');
     inputs.forEach(input => {
         input.addEventListener('change', (e) => {
-            // 選択状態のスタイリング
-            container.querySelectorAll('label').forEach(label => {
-                label.className = 'relative flex flex-col items-center justify-center p-3 border rounded-xl cursor-pointer transition-colors duration-200 bg-white border-slate-200 hover:border-blue-300 hover:bg-slate-50';
-            });
-            e.target.parentElement.className = 'relative flex flex-col items-center justify-center p-3 border rounded-xl cursor-pointer transition-colors duration-200 bg-blue-50 border-blue-700 shadow-sm';
-            
-            showFurusatoResult(e.target.value);
+            if (e.target.checked) {
+                selectedFurusato = e.target.value;
+                renderFurusatoRadio();
+                showFurusatoResult(e.target.value);
+            }
         });
     });
 }
