@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>最適支払いナビ | ポイ活＆ふるさと納税ルート検索</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body { font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', Meiryo, sans-serif; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen text-slate-800 p-4 md:p-8">
+    <div class="max-w-4xl mx-auto bg-white p-6 md:p-10 rounded-2xl shadow-sm border border-slate-200">
+        <div class="text-center mb-6">
+            <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-blue-800 shadow-sm mb-4 text-white text-2xl">
+                <i class="fas fa-coins"></i>
+            </div>
+            <h1 class="text-3xl font-extrabold text-slate-800 mb-2">最適支払いナビ</h1>
+            <p class="text-sm font-medium text-slate-500">ポイ活・ふるさと納税のお得ルート検索</p>
+        </div>
+
+        <div class="bg-slate-50 p-5 rounded-xl mb-8 text-sm text-slate-700 leading-relaxed border border-slate-200 shadow-sm relative overflow-hidden">
+            <div class="absolute top-0 left-0 w-1 h-full bg-blue-700"></div>
+            <p class="font-bold text-slate-800 mb-3 text-base flex items-center"><i class="fas fa-bullseye text-blue-700 mr-2"></i> このツールの目的</p>
+            <p class="mb-3">
+                頻繁にルールが変わる「ポイ活ルート」。どのクレジットカードからどのスマホ決済にチャージして支払うのが一番お得なのか、自分で調べるのはとても面倒ですよね。
+            </p>
+            <p>
+                「最適支払いナビ」は、あなたが今持っているクレジットカードと普段使っているスマホ決済を選ぶだけで、<strong>現在最もポイント還元率が高くなる最適な支払いルート</strong>を瞬時に計算・提案する無料ツールです。日々の買い物で損をしない、あなただけの最強ルートを見つけましょう！
+            </p>
+        </div>
+
+        <div class="bg-slate-50 p-5 rounded-xl mb-10 text-sm text-slate-700 leading-relaxed border border-slate-200 shadow-sm">
+            <p class="font-bold text-slate-800 mb-3 text-base"><i class="fas fa-list-ol text-blue-700 mr-2"></i> ツールの使い方</p>
+            <ol class="space-y-4 pl-2">
+                <li class="flex items-start">
+                    <span class="bg-blue-100 text-blue-800 rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold mr-3 mt-0.5 shrink-0">1</span>
+                    <div>
+                        <span class="font-bold text-slate-800 block mb-1">お持ちのクレジットカードを選ぶ</span>
+                        <p class="text-slate-600">あなたが現在持っている、または発行を検討しているカードを選択してください（複数可）。</p>
+                    </div>
+                </li>
+                <li class="flex items-start">
+                    <span class="bg-blue-100 text-blue-800 rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold mr-3 mt-0.5 shrink-0">2</span>
+                    <div>
+                        <span class="font-bold text-slate-800 block mb-1">よく使うスマホ決済を選ぶ</span>
+                        <p class="text-slate-600">普段のお店でよく使っている決済アプリを選択してください（複数可）。</p>
+                    </div>
+                </li>
+                <li class="flex items-start">
+                    <span class="bg-blue-100 text-blue-800 rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold mr-3 mt-0.5 shrink-0">3</span>
+                    <div>
+                        <span class="font-bold text-slate-800 block mb-1">「最強ルートを計算する」ボタンを押す</span>
+                        <p class="text-slate-600">選んだカードと決済の中から、一番ポイント還元率が高くなる組み合わせと、その間に経由すべきアプリ（KyashやANA Payなど）を自動で計算して図解します！</p>
+                    </div>
+                </li>
+            </ol>
+        </div>
+
+        <div class="mb-8">
+            <h2 class="text-lg font-bold border-b-2 border-slate-200 pb-2 mb-5 flex items-center text-slate-800">
+                <span class="bg-slate-200 text-slate-700 w-6 h-6 rounded-full flex items-center justify-center text-xs mr-2">1</span>
+                お持ちのクレジットカードを選択
+            </h2>
+            <div id="credit-cards" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                <!-- JavaScriptで生成 -->
+            </div>
+        </div>
+
+        <div class="mb-10">
+            <h2 class="text-lg font-bold border-b-2 border-slate-200 pb-2 mb-5 flex items-center text-slate-800">
+                <span class="bg-slate-200 text-slate-700 w-6 h-6 rounded-full flex items-center justify-center text-xs mr-2">2</span>
+                普段よく使うスマホ決済を選択
+            </h2>
+            <div id="digital-wallets" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                <!-- JavaScriptで生成 -->
+            </div>
+        </div>
+
+        <div class="text-center mb-10">
+            <button id="calculate-btn" class="bg-blue-700 hover:bg-blue-800 text-white font-bold py-4 px-10 rounded-full shadow-sm transition-colors duration-200">
+                <span class="flex items-center">
+                    最強ルートを計算する 
+                    <i class="fas fa-magic ml-3"></i>
+                </span>
+            </button>
+        </div>
+
+        <div id="result-area" class="hidden bg-slate-50 border border-slate-200 rounded-2xl p-6 md:p-8 shadow-sm relative">
+            <h2 class="text-2xl font-extrabold text-center mb-8 text-slate-800">あなたの最適決済ルート</h2>
+            
+            <div id="route-container" class="flex flex-col md:flex-row items-center justify-center gap-2 mb-6 flex-wrap">
+                <!-- JSで動的に生成 -->
+            </div>
+
+            <div class="text-center bg-white border border-slate-200 p-4 rounded-lg mb-8 shadow-sm">
+                <p class="text-sm text-slate-600">合計還元率</p>
+                <p class="text-3xl font-extrabold text-blue-700"><span id="result-rate">0</span>%</p>
+            </div>
+
+            <div class="mt-8 pt-6 border-t border-slate-200">
+                <h3 class="text-sm font-bold text-slate-700 mb-3 text-center">さらにお得に！おすすめカード</h3>
+                <div class="bg-white p-4 rounded-lg border border-slate-200 shadow-sm flex items-center justify-between">
+                    <div>
+                        <p class="font-bold text-slate-800">三井住友カード ゴールド（NL）</p>
+                        <p class="text-xs text-slate-500 mt-1">年間100万円利用で年会費永年無料＆1万pt還元</p>
+                    </div>
+                    <a href="#" class="bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold py-2 px-4 rounded shadow transition-colors" target="_blank">
+                        詳細・申込
+                    </a>
+                </div>
+                <p class="text-[10px] text-slate-400 text-right mt-1">※アフィリエイトリンクのサンプルです</p>
+            </div>
+        </div>
+
+        <!-- ふるさと納税へのブリッジ（繋がり） -->
+        <div class="mt-16 mb-8 text-center px-4 relative">
+            <h2 class="text-xl md:text-2xl font-extrabold text-slate-800 mb-4">日常の支払いを最適化できたら…</h2>
+            <div class="text-slate-600 text-sm md:text-base leading-relaxed space-y-2">
+                <p>次はお得の総決算、<strong>「ふるさと納税」</strong>でもポイントを最大限に活用しましょう！</p>
+                <p>せっかく作ったクレジットカードも、寄付する<span class="text-blue-700 font-bold border-b-2 border-blue-200">『日（タイミング）』</span>を間違えると大損してしまいます。</p>
+                <p>あなたがよく使うECサイトで、最もポイント還元率が高くなる「狙い目の日」をチェックしましょう。</p>
+            </div>
+        </div>
+
+        <!-- ふるさと納税セクション -->
+        <div class="bg-white p-5 md:p-8 rounded-2xl border border-slate-200 shadow-sm relative overflow-hidden">
+            <h2 class="text-xl font-bold text-slate-800 mb-4 flex items-center">
+                <i class="fas fa-gift text-blue-700 mr-2"></i> ふるさと納税・最適日チェッカー
+            </h2>
+            <p class="mb-5 text-slate-600 text-sm">よく使うECサイト（経済圏）を選ぶと、寄付に最もお得な「狙い目の日」と還元率アップのコツがわかります。</p>
+            
+            <div id="furusato-ec" class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                <!-- JSで生成 -->
+            </div>
+            
+            <div id="furusato-result" class="hidden bg-slate-50 border border-slate-200 rounded-xl p-5 text-center mt-4 transition-all duration-500 shadow-sm">
+                <p class="text-sm text-slate-500 mb-1">一番お得な寄付日は...</p>
+                <p id="furusato-date" class="text-xl md:text-2xl font-bold text-blue-700 mb-2">-</p>
+                <p id="furusato-note" class="text-sm text-slate-600 mb-5">-</p>
+                <a id="furusato-link" href="#" class="inline-block bg-blue-700 hover:bg-blue-800 text-white font-bold py-3 px-8 rounded-full shadow-sm transition-colors" target="_blank">
+                    ふるさと納税サイトへ <i class="fas fa-external-link-alt ml-1"></i>
+                </a>
+                <p class="text-[10px] text-slate-400 text-right mt-2">※アフィリエイトリンクのサンプルです</p>
+            </div>
+        </div>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>
