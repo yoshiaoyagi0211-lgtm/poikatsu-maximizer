@@ -124,16 +124,30 @@
 
             <div id="recommend-card-area" class="mt-8 pt-6 border-t border-slate-800">
                 <h3 class="text-sm font-bold text-slate-300 mb-3 text-center">さらにお得に！おすすめカード</h3>
-                <div class="bg-slate-800 p-4 rounded-lg border border-slate-700 shadow-md flex items-center justify-between">
-                    <div>
-                        <p id="recommend-card-name" class="font-bold text-white">-</p>
-                        <p id="recommend-card-note" class="text-xs text-slate-400 mt-1">-</p>
+                <div class="bg-slate-800 p-4 rounded-lg border border-slate-700 shadow-md">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p id="recommend-card-name" class="font-bold text-white">-</p>
+                            <p id="recommend-card-note" class="text-xs text-slate-400 mt-1">-</p>
+                        </div>
+                        <a id="recommend-card-link" href="#" class="bg-amber-600 hover:bg-amber-500 text-white text-xs font-bold py-2 px-4 rounded shadow-lg transition-colors shrink-0 ml-3" target="_blank">
+                            詳細・申込
+                        </a>
                     </div>
-                    <a id="recommend-card-link" href="#" class="bg-amber-600 hover:bg-amber-500 text-white text-xs font-bold py-2 px-4 rounded shadow-lg transition-colors" target="_blank">
-                        詳細・申込
-                    </a>
+                    <div id="recommend-compare" class="mt-4 pt-3 border-t border-slate-700 flex items-center justify-center gap-3 text-center">
+                        <div>
+                            <p class="text-[10px] text-slate-400">現在の最適</p>
+                            <p class="font-bold text-slate-300"><span id="rec-current-rate">0</span>%</p>
+                        </div>
+                        <i class="fas fa-arrow-right text-slate-500"></i>
+                        <div>
+                            <p class="text-[10px] text-slate-400">このカードなら</p>
+                            <p class="font-extrabold text-amber-500"><span id="rec-new-rate">0</span>%</p>
+                        </div>
+                        <span id="rec-diff" class="ml-2 text-xs font-bold text-emerald-400">+0.0%</span>
+                    </div>
                 </div>
-                <p class="text-[10px] text-slate-500 text-right mt-2">※アフィリエイトリンクのサンプルです</p>
+                <p class="text-[10px] text-slate-500 text-right mt-2">※還元率は最大還元時の目安です。アフィリエイトリンクのサンプルを含みます</p>
             </div>
         </div>
 
