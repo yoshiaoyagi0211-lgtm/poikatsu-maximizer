@@ -105,47 +105,74 @@ const routeData = [
     }
 ];
 
+// ============================================================
+// ★アフィリエイトリンク設定（ここだけ書き換えればOK）★
+// ------------------------------------------------------------
+// ASP（A8.net / バリューコマース等）で取得した「本物のURL」を
+// 下記の '#' の部分に貼り替えるだけで、サイト全体に反映されます。
+//   - 取得前       : '#'（ダミー。クリックしても遷移しません）
+//   - 案件が取れない: null （→ 自動で代替カードを表示します）
+// 詳しい取得手順・どのASPで取るかは affiliate-guide.md を参照。
+// ============================================================
+const affiliateLinks = {
+    'smbc_gold':       '#', // A8.net等で取得した三井住友ゴールドNLのURLに差し替え
+    'epos_gold':       '#', // A8.net等で取得したエポスゴールドのURLに差し替え
+    'rakuten_premium': '#', // 楽天アフィリエイト等で取得したURLに差し替え
+    'paypay_gold':     '#', // バリューコマース等で取得したURLに差し替え
+    'dcard_gold':      '#', // A8.net等で取得したdカードGOLDのURLに差し替え
+    'aeon_gold':       null, // 招待制のため発行案件なし（代替カードを表示）
+    'amazon_prime':    null  // ASP取り扱いが不安定なため当面null（代替カードを表示）
+};
+
+// アフィリエイト案件が取れないカードの「代替レコメンド」先
+// affiliateLinks が null のカードがレコメンドされた場合、ここで指定したカードに振り替えます。
+const recommendFallback = {
+    'aeon_gold':    'smbc_gold',  // イオンユーザー向けの汎用高還元カードに振替
+    'amazon_prime': 'paypay_gold' // PayPay系ルートと相性の良いカードに振替
+};
+
 // レコメンドカード（広告）のマスタデータ
+// ※申込URLは上の affiliateLinks で一元管理しています（ここには書きません）。
 const recommendCards = {
     'smbc_gold': {
         name: '三井住友カード ゴールド（NL）',
         note: '年間100万円利用で年会費永年無料＆1万pt還元。コンビニ・飲食店で最大7%還元！',
-        url: '#'
+        rate: 3.0
     },
     'epos_gold': {
         name: 'エポスゴールドカード',
         note: '選べるポイントアップショップでポイント3倍！モバイルSuicaも対象にできます。',
-        url: '#'
+        rate: 2.5
     },
     'rakuten_premium': {
         name: '楽天プレミアムカード',
         note: '楽天経済圏の最強カード！楽天市場でポイント最大+4倍、空港ラウンジも無料で使えます。',
-        url: '#'
+        rate: 3.0
     },
     'paypay_gold': {
         name: 'PayPayカード ゴールド',
         note: 'ソフトバンク・ワイモバイルユーザーなら通信料で最大10%還元！PayPay決済も常時お得に。',
-        url: '#'
+        rate: 2.0
     },
     'dcard_gold': {
         name: 'dカード GOLD',
         note: 'ドコモのケータイ・ドコモ光の利用料金の10%が還元！d払いとの相性も抜群です。',
-        url: '#'
+        rate: 1.5
     },
     'aeon_gold': {
         name: 'イオンゴールドカード',
         note: 'インビテーション限定！年会費無料でイオンラウンジが利用可能に。',
-        url: '#'
+        rate: 1.0
     },
     'amazon_prime': {
         name: 'Amazon Prime Mastercard',
         note: 'プライム会員ならAmazonでの買い物が常に2%還元！主要コンビニでも1.5%還元。',
-        url: '#'
+        rate: 2.0
     },
     'default': {
         name: '三井住友カード ゴールド（NL）',
         note: '迷ったらこれ！年間100万円利用で年会費永年無料＆1万pt還元。',
-        url: '#'
+        rate: 3.0
     }
 };
 
@@ -272,10 +299,34 @@ function displayResult(path, rate, recommendId) {
     resultRate.textContent = rate.toFixed(1);
 
     // レコメンドカードの反映
-    const recData = recommendCards[recommendId] || recommendCards['default'];
+    // アフィリエイトリンクが取れない（null）カードは代替カードに振り替える
+    let recId = recommendId;
+    if (!affiliateLinks[recId] && recommendFallback[recId]) {
+        recId = recommendFallback[recId];
+    }
+    const recData = recommendCards[recId] || recommendCards['default'];
+    const recUrl = affiliateLinks[recId] || '#';
     recName.textContent = recData.name;
     recNote.textContent = recData.note;
-    recLink.href = recData.url;
+    recLink.href = recUrl;
+
+    // 還元率の比較（Before/After）
+    const compareArea = document.getElementById('recommend-compare');
+    const recCurrentRate = document.getElementById('rec-current-rate');
+    const recNewRate = document.getElementById('rec-new-rate');
+    const recDiff = document.getElementById('rec-diff');
+    const recRate = typeof recData.rate === 'number' ? recData.rate : null;
+    const diff = recRate !== null ? recRate - rate : 0;
+
+    if (recRate !== null && diff > 0) {
+        recCurrentRate.textContent = rate.toFixed(1);
+        recNewRate.textContent = recRate.toFixed(1);
+        recDiff.textContent = `+${diff.toFixed(1)}%`;
+        compareArea.classList.remove('hidden');
+    } else {
+        // レコメンドの方が同等以下なら比較は出さない（マイナス表記の防止）
+        compareArea.classList.add('hidden');
+    }
 
     resultArea.classList.remove('hidden');
     // 再生のためのアニメーションリセット
