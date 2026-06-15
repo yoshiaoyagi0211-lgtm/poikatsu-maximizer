@@ -115,20 +115,22 @@ const routeData = [
 // 詳しい取得手順・どのASPで取るかは affiliate-guide.md を参照。
 // ============================================================
 const affiliateLinks = {
-    'smbc_gold':       '#', // A8.net等で取得した三井住友ゴールドNLのURLに差し替え
-    'epos_gold':       '#', // A8.net等で取得したエポスゴールドのURLに差し替え
+    'smbc_gold':       '#', // ※A8.netには無い。もしも/アクセストレード/バリューコマース等で取得して差し替え
+    'epos_gold':       'https://px.a8.net/svt/ejp?a8mat=4B5UW6+A2L06Q+38L8+BXYE9', // A8.net（エポスカード発行）
     'rakuten_premium': '#', // 楽天アフィリエイト等で取得したURLに差し替え
-    'paypay_gold':     '#', // バリューコマース等で取得したURLに差し替え
+    'paypay_gold':     null, // 2026年現在、主要ASPで取り扱いなし（→ 代替カードを表示）
     'dcard_gold':      '#', // A8.net等で取得したdカードGOLDのURLに差し替え
-    'aeon_gold':       null, // 招待制のため発行案件なし（代替カードを表示）
-    'amazon_prime':    null  // ASP取り扱いが不安定なため当面null（代替カードを表示）
+    'aeon_gold':       null, // 招待制のため発行案件なし（→ 代替カードを表示）
+    'amazon_prime':    null  // ASP取り扱いが不安定なため当面null（→ 代替カードを表示）
 };
 
 // アフィリエイト案件が取れないカードの「代替レコメンド」先
 // affiliateLinks が null のカードがレコメンドされた場合、ここで指定したカードに振り替えます。
+// ※代替先は必ず affiliateLinks が null でないカードを指定してください。
 const recommendFallback = {
-    'aeon_gold':    'smbc_gold',  // イオンユーザー向けの汎用高還元カードに振替
-    'amazon_prime': 'paypay_gold' // PayPay系ルートと相性の良いカードに振替
+    'aeon_gold':    'smbc_gold',     // イオンユーザー向けの汎用高還元カードに振替
+    'paypay_gold':  'rakuten_premium', // PayPayゴールドは案件なし → 楽天プレミアムに振替
+    'amazon_prime': 'rakuten_premium'  // Amazonは案件不安定 → 楽天プレミアムに振替
 };
 
 // レコメンドカード（広告）のマスタデータ
@@ -140,8 +142,8 @@ const recommendCards = {
         rate: 3.0
     },
     'epos_gold': {
-        name: 'エポスゴールドカード',
-        note: '選べるポイントアップショップでポイント3倍！モバイルSuicaも対象にできます。',
+        name: 'エポスカード（ゴールドへ無料アップグレード可）',
+        note: '年会費永年無料で発行でき、利用実績でゴールドカードへ無料ご招待。選べるポイントアップでモバイルSuica等も高還元に！',
         rate: 2.5
     },
     'rakuten_premium': {
