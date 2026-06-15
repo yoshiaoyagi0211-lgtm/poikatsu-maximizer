@@ -11,6 +11,18 @@ const creditCards = [
     { id: 'aeon_card', name: 'イオンカード', color: 'text-purple-600' }
 ];
 
+// ユーザーが「持っているカード」→ アフィリエイト案件ID の対応（レコメンド除外に使用）
+const cardToRecommendId = {
+    'rakuten': 'rakuten_premium',
+    'smbc_nl': 'smbc_gold',
+    'smbc_gold': 'smbc_gold',
+    'epos_gold': 'epos_gold',
+    'paypay_card': 'paypay_gold',
+    'dcard_gold': 'dcard_gold',
+    'amazon_master': 'amazon_prime',
+    'aeon_card': 'aeon_gold'
+};
+
 const digitalWallets = [
     { id: 'paypay', name: 'PayPay', color: 'text-red-500' },
     { id: 'rakuten_pay', name: '楽天ペイ', color: 'text-red-600' },
@@ -231,7 +243,6 @@ function calculateBestRoute() {
 
     let bestRate = -1;
     let bestRoutePath = null;
-    let bestRecommendId = 'default';
 
     selectedCards.forEach(cardId => {
         selectedWallets.forEach(walletId => {
@@ -242,7 +253,6 @@ function calculateBestRoute() {
                 if (route.rate > bestRate) {
                     bestRate = route.rate;
                     bestRoutePath = route.path;
-                    bestRecommendId = route.recommend || 'default';
                 }
             } else {
                 // 定義がない場合の汎用ルート（還元率0.5%として扱う）
@@ -255,22 +265,70 @@ function calculateBestRoute() {
                         { name: card.name, note: '直接チャージ等', rate: 0.5 },
                         { name: wallet.name, note: '決済', rate: 0 }
                     ];
-                    // 汎用ルートの場合はそのカードに応じたデフォルトレコメンドにするなど工夫可能だが、ここではdefaultとする
-                    bestRecommendId = 'default';
                 }
             }
         });
     });
 
-    displayResult(bestRoutePath, bestRate, bestRecommendId);
+    displayResult(bestRoutePath, bestRate, findUpgradeRecommend(selectedCards, selectedWallets, bestRate));
 }
 
-function displayResult(path, rate, recommendId) {
+// ユーザーが未所持のカードのうち、選択中の決済で還元率を上げられるものを探す
+function getOwnedRecommendIds(selectedCards) {
+    const owned = new Set();
+    selectedCards.forEach(cardId => {
+        const recId = cardToRecommendId[cardId];
+        if (recId) owned.add(recId);
+    });
+    return owned;
+}
+
+function resolveAffiliateLinkId(recId) {
+    if (affiliateLinks[recId]) return recId;
+    if (recommendFallback[recId] && affiliateLinks[recommendFallback[recId]]) {
+        return recommendFallback[recId];
+    }
+    return null;
+}
+
+function hasActiveAffiliateLink(linkId) {
+    const url = affiliateLinks[linkId];
+    return typeof url === 'string' && url.startsWith('http');
+}
+
+function findUpgradeRecommend(selectedCards, selectedWallets, currentRate) {
+    const owned = getOwnedRecommendIds(selectedCards);
+    let best = null;
+
+    selectedWallets.forEach(walletId => {
+        routeData.forEach(route => {
+            if (route.walletId !== walletId) return;
+            if (selectedCards.has(route.cardId)) return;
+            if (route.rate <= currentRate) return;
+
+            const recId = cardToRecommendId[route.cardId];
+            if (!recId || owned.has(recId)) return;
+
+            const linkId = resolveAffiliateLinkId(recId);
+            if (!linkId || !hasActiveAffiliateLink(linkId)) return;
+
+            if (!best || route.rate > best.upgradeRate) {
+                best = { recId: linkId, upgradeRate: route.rate };
+            }
+        });
+    });
+
+    return best;
+}
+
+function displayResult(path, rate, upgrade) {
     const resultArea = document.getElementById('result-area');
     const routeContainer = document.getElementById('route-container');
     const resultRate = document.getElementById('result-rate');
     
     // おすすめカード要素
+    const recArea = document.getElementById('recommend-card-area');
+    const recOptimalMsg = document.getElementById('recommend-optimal-msg');
     const recName = document.getElementById('recommend-card-name');
     const recNote = document.getElementById('recommend-card-note');
     const recLink = document.getElementById('recommend-card-link');
@@ -300,34 +358,29 @@ function displayResult(path, rate, recommendId) {
 
     resultRate.textContent = rate.toFixed(1);
 
-    // レコメンドカードの反映
-    // アフィリエイトリンクが取れない（null）カードは代替カードに振り替える
-    let recId = recommendId;
-    if (!affiliateLinks[recId] && recommendFallback[recId]) {
-        recId = recommendFallback[recId];
-    }
-    const recData = recommendCards[recId] || recommendCards['default'];
-    const recUrl = affiliateLinks[recId] || '#';
-    recName.textContent = recData.name;
-    recNote.textContent = recData.note;
-    recLink.href = recUrl;
+    // 未所持カードで還元率が上がる場合のみレコメンドを表示
+    if (upgrade) {
+        const recData = recommendCards[upgrade.recId] || recommendCards['default'];
+        recName.textContent = recData.name;
+        recNote.textContent = recData.note;
+        recLink.href = affiliateLinks[upgrade.recId];
 
-    // 還元率の比較（Before/After）
-    const compareArea = document.getElementById('recommend-compare');
-    const recCurrentRate = document.getElementById('rec-current-rate');
-    const recNewRate = document.getElementById('rec-new-rate');
-    const recDiff = document.getElementById('rec-diff');
-    const recRate = typeof recData.rate === 'number' ? recData.rate : null;
-    const diff = recRate !== null ? recRate - rate : 0;
+        const compareArea = document.getElementById('recommend-compare');
+        const recCurrentRate = document.getElementById('rec-current-rate');
+        const recNewRate = document.getElementById('rec-new-rate');
+        const recDiff = document.getElementById('rec-diff');
+        const diff = upgrade.upgradeRate - rate;
 
-    if (recRate !== null && diff > 0) {
         recCurrentRate.textContent = rate.toFixed(1);
-        recNewRate.textContent = recRate.toFixed(1);
+        recNewRate.textContent = upgrade.upgradeRate.toFixed(1);
         recDiff.textContent = `+${diff.toFixed(1)}%`;
         compareArea.classList.remove('hidden');
+
+        recArea.classList.remove('hidden');
+        recOptimalMsg.classList.add('hidden');
     } else {
-        // レコメンドの方が同等以下なら比較は出さない（マイナス表記の防止）
-        compareArea.classList.add('hidden');
+        recArea.classList.add('hidden');
+        recOptimalMsg.classList.remove('hidden');
     }
 
     resultArea.classList.remove('hidden');

@@ -122,8 +122,9 @@
                 <p class="text-3xl font-extrabold text-amber-500"><span id="result-rate">0</span>%</p>
             </div>
 
-            <div id="recommend-card-area" class="mt-8 pt-6 border-t border-slate-800">
-                <h3 class="text-sm font-bold text-slate-300 mb-3 text-center">さらにお得に！おすすめカード</h3>
+            <div id="recommend-card-area" class="mt-8 pt-6 border-t border-slate-800 hidden">
+                <h3 class="text-sm font-bold text-slate-300 mb-1 text-center">まだお持ちでない方へ</h3>
+                <p class="text-xs text-slate-500 text-center mb-3">このカードを追加すると、同じ決済でもっと還元率が上がります</p>
                 <div class="bg-slate-800 p-4 rounded-lg border border-slate-700 shadow-md">
                     <div class="flex items-center justify-between">
                         <div>
@@ -147,7 +148,10 @@
                         <span id="rec-diff" class="ml-2 text-xs font-bold text-emerald-400">+0.0%</span>
                     </div>
                 </div>
-                <p class="text-[10px] text-slate-500 text-right mt-2">※還元率は最大還元時の目安です。アフィリエイトリンクのサンプルを含みます</p>
+                <p class="text-[10px] text-slate-500 text-right mt-2">※還元率は最大還元時の目安です</p>
+            </div>
+            <div id="recommend-optimal-msg" class="mt-8 pt-6 border-t border-slate-800 hidden">
+                <p class="text-sm text-slate-400 text-center"><i class="fas fa-check-circle text-emerald-500 mr-1"></i>選択中のカード・決済の組み合わせが最適です</p>
             </div>
         </div>
 
